@@ -1,0 +1,215 @@
+{
+        static private bool IsOperator(string s)
+        {
+            if ("!+-/*^sincostgctglnlg".IndexOf(s) == -1)
+                return false;
+            return true;
+        }
+
+        static private byte GetPriority(string s)
+        {
+            switch(s)
+            {
+                case "(": return 1; 
+                case ")": return 1; 
+                case "+": return 2;	
+                case "-": return 2;
+                case "*": return 3; 
+                case "/": return 3;
+                case "^": return 4;
+                case "sin": return 5;
+                case "cos": return 5;
+                case "tg": return 5;
+                case "ctg": return 5;
+                case "ln": return 5;
+                case "lg": return 5;
+                case "!": return 6;
+                default: return 7;
+            }
+        }
+
+        static public double Convertation(string input, double x)
+        {
+            double per = x;
+            string output = GetPostEx(input);
+            double result = FuncResult(output,per);
+            return result;
+        }
+
+        static private string GetPostEx(string input)
+        {
+            string[] mas = input.Split(' ');
+            double num;
+            string output = String.Empty;
+            Stack<string> Operator_Stack = new Stack<string>();
+
+            for(int i = 0;i<mas.Length;i++)
+            {
+
+                if (double.TryParse(mas[i], out num) == true || mas[i] == "x")
+                {
+                    output += mas[i] + " ";
+                    continue;
+                }
+
+                if (IsOperator(mas[i]) == true)
+                {
+                    if(mas[i]=="-" && Operator_Stack.Peek()=="(")//унарный минус
+                    {
+                        Operator_Stack.Push("!");
+                        continue;
+                    }
+                    if (Operator_Stack.Count == 0 || GetPriority(mas[i]) > GetPriority(Operator_Stack.Peek()))
+                    {
+                        Operator_Stack.Push(mas[i]);
+                        continue;
+                    }
+                    if (GetPriority(mas[i]) <= GetPriority(Operator_Stack.Peek()))
+                    {
+                        while ((Operator_Stack.Count != 0) && (GetPriority(mas[i]) <= GetPriority(Operator_Stack.Peek())))
+                        {
+                            output += Operator_Stack.Pop() + " ";
+                        }
+                        Operator_Stack.Push(mas[i]);
+                        continue;
+                    }
+                }           
+
+                if(mas[i]=="(")
+                {
+                    Operator_Stack.Push(mas[i]); 
+                    continue;
+                }
+
+                if(mas[i]==")")
+                {
+                    while (Operator_Stack.Peek() != "(")
+                        output += Operator_Stack.Pop() + " ";
+                    if (Operator_Stack.Peek() == "(")
+                        Operator_Stack.Pop();
+                }                  
+            }
+            if (Operator_Stack.Count != 0)
+            {
+                while (Operator_Stack.Count != 0)
+                    output += Operator_Stack.Pop() + " ";
+
+            }
+
+            return output.Trim(' ');
+        }
+
+        static private double FuncResult(string output,double per)
+        {
+            string[] mas = output.Split(' ');
+            double num;
+            double result = 0;
+            
+            Stack<double> Operand_Stack = new Stack<double>();
+
+            for(int i = 0;i<mas.Length;i++)
+            {
+                if(double.TryParse(mas[i], out num) == true || mas[i] == "x")
+                {
+                    string s = String.Empty;
+
+                    if (mas[i] == "x")
+                    {
+                        s += per;
+                    }
+                    else
+                    {
+                        s += mas[i];
+                    }
+                    
+                    Operand_Stack.Push(double.Parse(s));
+                    continue;
+                }
+
+                else if (IsOperator(mas[i]) == true)
+                {
+                    if("+-*/^".IndexOf(mas[i])!=-1)
+                    {
+                        double a = Operand_Stack.Pop();
+                        double b = Operand_Stack.Pop();
+
+                        switch (mas[i])
+                        {
+                            case "+":
+                                {
+                                    result = b + a;
+                                    break;
+                                }
+                            case "-":
+                                {
+                                    result = b - a;
+                                    break;
+                                }
+                            case "*":
+                                {
+                                    result = b * a;
+                                    break;
+                                }
+                            case "/":
+                                {
+                                    result = b / a;
+                                    break;
+                                }
+                            case "^":
+                                {
+                                    result = Math.Pow(b,a);
+                                    break;
+                                }                               
+                        }
+                        Operand_Stack.Push(result);
+                    }
+
+                    else if("!sincostgctglnlg".IndexOf(mas[i])!=-1)
+                    {
+                        double a = Operand_Stack.Pop();
+
+                        switch (mas[i])
+                        {
+                            case "!":
+                                {
+                                    result = a * (-1);
+                                    break;
+                                }
+                            case "sin":
+                                {
+                                    result = Math.Sin(a);
+                                    break;
+                                }
+                            case "cos":
+                                {
+                                    result = Math.Cos(a);
+                                    break;
+                                }
+                            case "tg":
+                                {
+                                    result = Math.Tan(a);
+                                    break;
+                                }
+                            case "ctg":
+                                {
+                                    result = Math.Sin(a)/Math.Cos(a);
+                                    break;
+                                }
+                            case "ln":
+                                {
+                                    result = Math.Log(a);
+                                    break;
+                                }
+                            case "lg":
+                                {
+                                    result = Math.Log10(a);
+                                    break;
+                                }
+                        }
+                        Operand_Stack.Push(result);
+                    }                 
+                }
+            }
+            return Operand_Stack.Peek();           
+        }
+    }

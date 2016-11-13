@@ -126,6 +126,9 @@ namespace LongNumCalc
             }
         }
     }
+    /// <summary>
+    ///  Класс, реализующий получение и вычисления , получаемого из входных данных
+    /// </summary>
     public class ReversePolishNotation
     {
         //Метод возвращает true, если проверяемый символ - разделитель ("пробел" или "равно")
@@ -138,6 +141,7 @@ namespace LongNumCalc
         static private bool IsOperator(char с)
         {
             if (("+-/*()".IndexOf(с) != -1))
+
                 return true;
             return false;
         }
@@ -156,27 +160,28 @@ namespace LongNumCalc
             }
         }
 
-        static public double Calculate(string input)
+        static public BigInt Calculate(string input)
         {
             string output = GetExpression(input); //Преобразовыние выражения в постфиксную запись
-            double result = CalculationRpn(output); //Вычисление значения в рпн
+            BigInt result = CalculationRpn(output); //Вычисление значения в рпн
             return result;
         }
         static private string GetExpression(string input)
         {
-            int operator_count = 0;
             string output = string.Empty; //Строка для хранения выражения
             Stack<char> operStack = new Stack<char>(); //Стек для хранения операторов
 
             for (int i = 0; i < input.Length; i++) //Для каждого символа в входной строке
-            {
+            {   
                 if (Char.IsLetter(input[i]))
                 {
                     throw new FormatException();
                 }
                 //Разделители пропускаем
                 if (IsDelimeter(input[i]))
+                {
                     continue; //Переходим к следующему символу
+                }
 
                 //Если символ - цифра, то считываем все число
                 if (Char.IsDigit(input[i])) //Если цифра
@@ -242,10 +247,10 @@ namespace LongNumCalc
 
             return output; //Возвращаем выражение в постфиксной записи
         }
-        static private double CalculationRpn(string input)
+        static private BigInt CalculationRpn(string input)
         {
-            double result = 0;
-            Stack<double> temp = new Stack<double>(); // стек для решения
+            BigInt result = new BigInt();
+            Stack<BigInt> temp = new Stack<BigInt>(); // стек для решения
 
             for (int i = 0; i < input.Length; i++) // иду по строке
             {
@@ -264,31 +269,33 @@ namespace LongNumCalc
                             break;
                         }
                     }
-                    temp.Push(double.Parse(a)); //Записываем в стек
+                    BigInt A = new BigInt(a);
+                    temp.Push(A); //Записываем в стек
                     i--;
                 }
                 if (input[i] == '!')// вычисления для унарного минуса
                 {
-                    double a = temp.Pop();
-                    result = a * (-1);
+                    BigInt a = temp.Pop();
+                    a.ChangeSign();
+                    result = a;
                     temp.Push(result);
                 }
                 else if (IsOperator(input[i]) && input[i] != '!') //Если символ - оператор (кроме унарного минуса)
                 {
 
                     //Берем два последних значения из стека
-                    double a = temp.Pop();
-                    double b = temp.Pop();
+                    BigInt a = temp.Pop();
+                    BigInt b = temp.Pop();
 
                     switch (input[i]) //И производим над ними действие, согласно оператору
                     {
-                        case '+': result = b + a;
+                        case '+': result = BigInt.Addition(b,a);
                         break;
-                        case '-': result = b - a;
+                        case '-': result = BigInt.Substraction(b,a);
                         break;
-                        case '*': result = b * a;
+                        case '*': result = BigInt.Multiplication(b,a);
                         break;
-                        case '/': result = b / a;
+                        case '/': result = BigInt.Division(b,a);
                         break;
                     }
                     temp.Push(result); //Результат вычисления записываем обратно в стек
@@ -323,23 +330,56 @@ namespace LongNumCalc
             StringBuilder sb = new StringBuilder();
             if (sign == false)
             {
+                sb.Append("(");
                 sb.Append("-");
             }
             for (int i = values.Count - 1; i >= 0; i--)
             {
                 sb.Append(values[i]);
             }
+            if (sign == false)
+            {
+                sb.Append(")");
+            }
 
             return sb.ToString();
         }
-        public void SetNegative(BigInt A)
+        public void ChangeSign()
         {
-            if (A.sign == true)
-                A.sign = false;
-            if (A.sign == false)
-                A.sign = true;
+            if (sign == true)
+            {
+                sign = false;
+                return;
+            }
+            if (sign == false)
+            {
+                sign = true;
+                return;
+            }
         }
+        public void ChangeSign(bool sign)
+        {
+            this.sign = sign;
+        }
+        // TODO: Compare to!!!
         public int CompareTo(BigInt other)
+        {
+            if (this.sign && other.sign)//оба положительных
+            {
+                return AbsCompareTo(other);
+            }
+            if (this.sign && !other.sign)//первое число положительное
+            {
+                return 1;
+            }
+            if (!this.sign && other.sign)//второе число положительное
+            {
+                return -1;
+            }
+            return -1 * AbsCompareTo(other);
+
+        }
+        private int AbsCompareTo(BigInt other)
         {
             int ans = 0;
             if (this.values.Count == other.values.Count)
@@ -372,7 +412,7 @@ namespace LongNumCalc
             }
             return ans;
         }
-        public static BigInt Addition (BigInt A, BigInt B)
+        public static BigInt Addition(BigInt A, BigInt B)
         {
             BigInt result = new BigInt();
             if (A.sign && B.sign)
@@ -387,10 +427,36 @@ namespace LongNumCalc
             {
                 result = BigInt.AbsSubstraction(A, B);
             }
-            else
+            if (!A.sign && !B.sign)
             {
-
+                result = BigInt.AbsAddition(A, B);
+                result.ChangeSign();
             }
+
+            return result;
+        }
+        public static BigInt Substraction(BigInt A, BigInt B)
+        {
+            BigInt result = new BigInt();
+            if (A.sign && B.sign)
+            {
+                result = BigInt.AbsSubstraction(A, B);
+            }
+            if (!A.sign && B.sign)
+            {
+                result = BigInt.AbsAddition(A, B);
+                result.ChangeSign();
+                // TODO: check right work for method SetNegative
+            }
+            if (A.sign && !B.sign)
+            {
+                result = BigInt.AbsAddition(A, B);
+            }
+            if (!A.sign && !B.sign)
+            {
+                result = BigInt.AbsSubstraction(B, A);
+            }
+
             return result;
         }
         private static BigInt AbsAddition(BigInt A, BigInt B)
@@ -428,6 +494,7 @@ namespace LongNumCalc
                     {
                         result.values.Add(A.values[i]);
                     }
+                    
                 }
             }
             if (B.values.Count > A.values.Count)
@@ -446,52 +513,214 @@ namespace LongNumCalc
             }
             return result;
         }
-        public static BigInt AbsSubstraction(BigInt A, BigInt B)
+        private static BigInt AbsSubstraction(BigInt A, BigInt B)
         {
             BigInt result = new BigInt();
 
             if (A.CompareTo(B) == 0)
             {
                 result.values.Add(0);
-                return result;
+
             }
-
-            int temp = 0;
-
-            while (B.values.Count < A.values.Count)
+            if (A.CompareTo(B) == 1)
             {
-                B.values.Add(0);
-            }
 
+                int temp = 0;
 
-            for (int i = 0; i < A.values.Count; i++)
-            {
-                result.values.Add(A.values[i] - B.values[i] - temp);
-                if (result.values[i] < 0)
+                while (B.values.Count < A.values.Count)
                 {
-                    result.values[i] += 10;
-                    temp = 1;
+                    B.values.Add(0);
                 }
-                else
+
+
+                for (int i = 0; i < A.values.Count; i++)
                 {
-                    temp = 0;
+                    result.values.Add(A.values[i] - B.values[i] - temp);
+                    if (result.values[i] < 0)
+                    {
+                        result.values[i] += 10;
+                        temp = 1;
+                    }
+                    else
+                    {
+                        temp = 0;
+                    }
                 }
-            }
-            if (result.values.Count > 0)
-            {
-                int k = result.values.Count - 1;
-                while (result.values[k] == 0)
+                if (result.values.Count > 0)
                 {
-                    result.values.RemoveAt(k);
+                    int k = result.values.Count - 1;
+                    while (result.values[k] == 0)
+                    {
+                        result.values.RemoveAt(k);
+                        k--;
+
+                    }
+                }
+
+
+            }
+            if (A.CompareTo(B) == -1)
+            {
+                result = BigInt.AbsSubstraction(B, A);
+                result.ChangeSign();
+            }
+            if (B.values.Count > 0)
+            {
+                int k = B.values.Count - 1;
+                while (B.values[k] == 0)
+                {
+                    if (k == 0)
+                    {
+                        break;
+                    }
+                    B.values.RemoveAt(k);
                     k--;
 
                 }
             }
 
-
             return result;
 
         }
+        public static BigInt Multiplication(BigInt A, int b)
+        {
+            BigInt result = new BigInt();
+            if ((A.sign && b >= 0) || (!A.sign && b < 0))
+            {
+                result.sign = true;
+            }
+            else
+            {
+                result.sign = false;
+            }
+            b = Math.Abs(b);
+            int temp = 0;
+            for (int i = 0; i < A.values.Count; i++)
+            {
+                temp = A.values[i] * b + temp;
+                if (temp > 9)
+                {
+                    result.values.Add(temp % 10);
+                    temp = temp / 10;
+                }
+                else
+                {
+                    result.values.Add(temp);
+                    temp = 0;
+                }
+            }
+            if (temp != 0)
+
+            {
+                result.values.Add(temp);
+            }
+            return result;
+        }
+        public static BigInt Multiplication(BigInt A, BigInt B)
+        {
+            BigInt result = new BigInt();
+
+            for (int i = 0; i < A.values.Count; i++)
+            {
+                BigInt temp = BigInt.Multiplication(B, A.values[i]);//умножаем текущий разряд числа на другое длинное число
+                for (int j = 0; j < i; j++)//сдвигаем его
+                {
+                    temp.values.Insert(0, 0);
+                }
+                result = BigInt.Addition(result, temp);//складываем с другими
+            }
+            if ((A.sign && B.sign) || (!A.sign && !B.sign))
+            {
+                result.ChangeSign(true);
+            }
+            else
+            {
+                result.ChangeSign(false);
+            }
+            int k = result.values.Count - 1;
+            while (result.values[k] == 0) //удаление возможных лишних нулей
+            {
+                if (k == 0)
+                {
+                    result.ChangeSign(true);
+                    break;
+                }
+                result.values.RemoveAt(k);
+                k--;
+
+            }
+            return result;
+        }
+        public static BigInt Division(BigInt A, BigInt B)
+        {
+            bool new_sign;
+            if ((A.sign && B.sign) || (!A.sign && !B.sign))
+            {
+                new_sign = true;
+            }
+            else
+            {
+                new_sign = false;
+            }
+            A.ChangeSign(true);
+            B.ChangeSign(true);
+            BigInt temp = new BigInt();
+            BigInt res = new BigInt();
+            while (res.values.Count < A.values.Count)
+            {
+                res.values.Add(0);
+            }
+
+            int i = A.values.Count - 1;
+            while (i >= 0)
+            {
+
+                temp.values.Insert(0, A.values[i]);
+                if (temp.values.Count > 0)
+                {
+                    int k = temp.values.Count - 1;
+                    while (temp.values[k] == 0)
+                    {
+                        if (k == 0)
+                        {
+                            break;
+                        }
+                        temp.values.RemoveAt(k);
+                        k--;
+
+                    }
+                }
+                while (temp.CompareTo(B) >= 0)
+                {
+                    temp = BigInt.Substraction(temp, B);
+                    res.values[i]++;
+                }
+                if (temp.CompareTo(B) == -1)
+                {
+                    i--;
+                }
+            }
+            res.ChangeSign(new_sign);
+            if (res.values.Count > 0)
+            {
+                int k = res.values.Count - 1;
+                while (res.values[k] == 0)
+                {
+                    if (k == 0)
+                    {
+                        res.ChangeSign(true);
+                        break;
+                    }
+                    res.values.RemoveAt(k);
+                    k--;
+
+                }
+            }
+            return res;
+        }
     }
-   
+
 }
+
+   
+
