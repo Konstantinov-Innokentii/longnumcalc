@@ -115,15 +115,26 @@ namespace LongNumCalc
             {
                 string various = tb_console_one.Text;
                 tb_console_one.Text = ReversePolishNotation.Calculate(various).ToString();
-                tb_console_two.Text = various;
+                tb_console_two.Text = various+"=";
             }
-            catch (FormatException)
+            catch (InputException ie)
             {
-                MessageBox.Show("Invalid values");
+                MessageBox.Show("Invalid symbol",ie.wrongSymbol.ToString());
                 tb_console_one.Text = "";
                 tb_console_two.Text = "";
 
             }
+        }
+
+        private void button_del_Click(object sender, RoutedEventArgs e)
+        {
+            tb_console_one.Text = tb_console_one.Text.Substring(0, tb_console_one.Text.Length - 1);
+        }
+
+        private void button1_delall_Click(object sender, RoutedEventArgs e)
+        {
+            tb_console_one.Text = "";
+            tb_console_two.Text = "";
         }
     }
     /// <summary>
@@ -175,7 +186,7 @@ namespace LongNumCalc
             {   
                 if (Char.IsLetter(input[i]))
                 {
-                    throw new FormatException();
+                    throw new InputException("Invalid symbol",input[i]);
                 }
                 //Разделители пропускаем
                 if (IsDelimeter(input[i]))
@@ -361,7 +372,7 @@ namespace LongNumCalc
         {
             this.sign = sign;
         }
-        // TODO: Compare to!!!
+       
         public int CompareTo(BigInt other)
         {
             if (this.sign && other.sign)//оба положительных
@@ -719,6 +730,15 @@ namespace LongNumCalc
             return res;
         }
     }
+    class InputException : Exception
+    {
+        public char wrongSymbol;
+        public InputException(String message, char wrongSymbol):base (message)
+        {
+            this.wrongSymbol = wrongSymbol;
+        }
+    }
+
 
 }
 
