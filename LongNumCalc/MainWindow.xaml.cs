@@ -23,6 +23,7 @@ namespace LongNumCalc
         public MainWindow()
         {
             InitializeComponent();
+            tb_console_one.Focus();
         }
 
         private void button_0_Click(object sender, RoutedEventArgs e)
@@ -111,24 +112,35 @@ namespace LongNumCalc
 
         private void button_res_Click(object sender, RoutedEventArgs e)
         {
+            
             try
             {
-                string various = tb_console_one.Text;
-                tb_console_one.Text = ReversePolishNotation.Calculate(various).ToString();
-                tb_console_two.Text = various+"=";
+                string input = tb_console_one.Text;
+                tb_console_one.Text = ReversePolishNotation.Calculate(input).ToString();
+                tb_console_two.Text = input+"=";
+                tb_console_one.Focus();
             }
-            catch (InputException ie)
+            catch (FormatException)
             {
-                MessageBox.Show("Invalid symbol",ie.wrongSymbol.ToString());
-                tb_console_one.Text = "";
-                tb_console_two.Text = "";
+                MessageBox.Show("Wrong input", "Warning");
+                
+                tb_console_one.Focus();
+            }
+            catch (DivisionbyZeroException)
+            {
 
+                MessageBox.Show("Division by zero","Warning");
+                
+                tb_console_one.Focus();
             }
         }
 
         private void button_del_Click(object sender, RoutedEventArgs e)
         {
-            tb_console_one.Text = tb_console_one.Text.Substring(0, tb_console_one.Text.Length - 1);
+            if (tb_console_one.Text.Length!=0)
+            {
+                tb_console_one.Text = tb_console_one.Text.Substring(0, tb_console_one.Text.Length - 1);
+            }
         }
 
         private void button1_delall_Click(object sender, RoutedEventArgs e)
@@ -136,13 +148,35 @@ namespace LongNumCalc
             tb_console_one.Text = "";
             tb_console_two.Text = "";
         }
+        private  void tb_console_one_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled= "0123456789+-*/() ".IndexOf(e.Text) < 0;
+        }
+
+        private void tb_console_one_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key==Key.Space)
+            {
+                e.Handled = true;
+            }
+            if (e.Key==Key.Enter)
+            {
+                
+            }
+        }
     }
     /// <summary>
     ///  Класс, реализующий получение и вычисления , получаемого из входных данных
     /// </summary>
     public class ReversePolishNotation
     {
-        //Метод возвращает true, если проверяемый символ - разделитель ("пробел" или "равно")
+        static private bool IsOperatorNotBrace(char c)
+        {
+            if (("+-/*".IndexOf(c) != -1))
+                return true;
+            return false;
+        }
+       // Метод возвращает true, если проверяемый символ - разделитель("пробел" или "равно")
         static private bool IsDelimeter(char c)
         {
             if ((" =".IndexOf(c) != -1))
@@ -152,7 +186,6 @@ namespace LongNumCalc
         static private bool IsOperator(char с)
         {
             if (("+-/*()".IndexOf(с) != -1))
-
                 return true;
             return false;
         }
@@ -170,9 +203,60 @@ namespace LongNumCalc
                 default: return 6;
             }
         }
+        static public void CheckInput(string input)
+        {
+            if (IsOperatorNotBrace(input[0]) || IsOperatorNotBrace(input[input.Length - 1]))
+            {
+                throw new FormatException();
+            }
+            Stack<char> s = new Stack<char>();
+            for (int i = 0; i < input.Length - 1; i++)
+            {
+
+                if (IsOperatorNotBrace(input[i]) && IsOperatorNotBrace(input[i + 1]))
+                {
+                    throw new FormatException();
+                }
+
+                if (input[i] == '(' && (input[i + 1] != '-' && !Char.IsDigit(input[i + 1]) && input[i + 1] != '(')) // TODO : some unclear with truth-functional operations
+                {
+                    throw new FormatException();
+                }
+                if (input[i]=='-'&& input[i+1]==')')
+                {
+                    throw new FormatException();
+                }
+            }
+            int j = 0;
+            while (j < input.Length)
+            {
+                if (input[j] == '(')
+                {
+                    s.Push(input[j]);
+                }
+                if (input[j] == ')')
+                {
+                    if (s.Count == 0)
+                    {
+                        throw new FormatException();
+                    }
+                    else
+                    {
+                        s.Pop();
+                    }
+                }
+                j++;
+            }
+            if (s.Count!=0)
+            {
+                throw new FormatException();
+            }
+
+        }
 
         static public BigInt Calculate(string input)
         {
+            CheckInput(input);
             string output = GetExpression(input); //Преобразовыние выражения в постфиксную запись
             BigInt result = CalculationRpn(output); //Вычисление значения в рпн
             return result;
@@ -181,19 +265,17 @@ namespace LongNumCalc
         {
             string output = string.Empty; //Строка для хранения выражения
             Stack<char> operStack = new Stack<char>(); //Стек для хранения операторов
-
             for (int i = 0; i < input.Length; i++) //Для каждого символа в входной строке
             {   
-                if (Char.IsLetter(input[i]))
-                {
-                    throw new InputException("Invalid symbol",input[i]);
-                }
+                //if (Char.IsLetter(input[i]))
+                //{
+                //    throw new InputException("Invalid symbol",input[i]);
+                //}
                 //Разделители пропускаем
                 if (IsDelimeter(input[i]))
                 {
                     continue; //Переходим к следующему символу
                 }
-
                 //Если символ - цифра, то считываем все число
                 if (Char.IsDigit(input[i])) //Если цифра
                 {
@@ -205,18 +287,15 @@ namespace LongNumCalc
 
                         if (i == input.Length) break; //Если символ - последний, то выходим из цикла
                     }
-
                     output += " "; //Дописываем после числа пробел в строку с выражением
                     i--; //Возвращаемся на один символ назад, к символу перед разделителем
                 }
-
                 //Если символ - оператор
                 if (IsOperator(input[i])) //Если оператор
                 {
-
                     if (operStack.Count != 0)
                     {
-                        if (input[i] == '-' && operStack.Peek() == '(')
+                        if (input[i] == '-' && operStack.Peek() == '(' && !Char.IsDigit(input[i-1])) // HACK : for correct work with x*(y-y) types
                         {
                             operStack.Push('!');
                             continue;
@@ -228,7 +307,6 @@ namespace LongNumCalc
                     {
                         //Выписываем все операторы до открывающей скобки в строку
                         char s = operStack.Pop();
-
                         while (s != '(')
                         {
                             output += s.ToString() + ' ';
@@ -237,39 +315,30 @@ namespace LongNumCalc
                     }
                     else //Если любой другой оператор
                     {
-                        if (operStack.Count > 0)
-                        //Если в стеке есть элементы
+                        if (operStack.Count > 0)//Если в стеке есть элементы
                             if (GetPriority(input[i]) <= GetPriority(operStack.Peek())) //И если приоритет нашего оператора меньше или равен приоритету оператора на вершине стека
-                            
-                                output += operStack.Pop().ToString() + " "; //То добавляем последний оператор из стека в строку с выражением
-                            
-                        
-                        operStack.Push(char.Parse(input[i].ToString())); //Если стек пуст, или же приоритет оператора выше - добавляем операторов на вершину стека
-
+                                 output += operStack.Pop().ToString() + " "; //То добавляем последний оператор из стека в строку с выражением
+                            operStack.Push(char.Parse(input[i].ToString())); //Если стек пуст, или же приоритет оператора выше - добавляем операторов на вершину стека
                     }
                 }
             }
-
-            //Когда прошли по всем символам, выкидываем из стека все оставшиеся там операторы в строку
+            //выкидываем из стека все оставшиеся там операторы в строку
             while (operStack.Count > 0)
             {
                 output += operStack.Pop() + " ";
             }
-
             return output; //Возвращаем выражение в постфиксной записи
         }
         static private BigInt CalculationRpn(string input)
         {
             BigInt result = new BigInt();
             Stack<BigInt> temp = new Stack<BigInt>(); // стек для решения
-
             for (int i = 0; i < input.Length; i++) // иду по строке
             {
                 //Если символ - цифра, то читаем все число и записываем на вершину стека
                 if (Char.IsDigit(input[i]))
                 {
                     string a = string.Empty;
-
                     while (!IsDelimeter(input[i]) && !IsOperator(input[i])) //Пока не разделитель
                     {
                         a += input[i]; //Добавляем
@@ -293,11 +362,9 @@ namespace LongNumCalc
                 }
                 else if (IsOperator(input[i]) && input[i] != '!') //Если символ - оператор (кроме унарного минуса)
                 {
-
                     //Берем два последних значения из стека
                     BigInt a = temp.Pop();
                     BigInt b = temp.Pop();
-
                     switch (input[i]) //И производим над ними действие, согласно оператору
                     {
                         case '+': result = BigInt.Addition(b,a);
@@ -338,6 +405,21 @@ namespace LongNumCalc
         }
         public override string ToString()
         {
+            //HACK: удаление лишних нулей
+            if (this.values.Count > 0)
+            {
+                int k = this.values.Count - 1;
+                while (this.values[k] == 0)
+                {
+                    if (k == 0)
+                    {
+                        break;
+                    }
+                    this.values.RemoveAt(k);
+                    k--;
+
+                }
+            }
             StringBuilder sb = new StringBuilder();
             if (sign == false)
             {
@@ -352,7 +434,7 @@ namespace LongNumCalc
             {
                 sb.Append(")");
             }
-
+           
             return sb.ToString();
         }
         public void ChangeSign()
@@ -395,7 +477,6 @@ namespace LongNumCalc
             int ans = 0;
             if (this.values.Count == other.values.Count)
             {
-
                 for (int i = this.values.Count - 1; i >= 0; i--)
                 {
                     if (this.values[i] > other.values[i])
@@ -407,7 +488,6 @@ namespace LongNumCalc
                     {
                         return ans = -1;
                     }
-
                 }
             }
             else
@@ -457,7 +537,6 @@ namespace LongNumCalc
             {
                 result = BigInt.AbsAddition(A, B);
                 result.ChangeSign();
-                // TODO: check right work for method SetNegative
             }
             if (A.sign && !B.sign)
             {
@@ -528,12 +607,12 @@ namespace LongNumCalc
         {
             BigInt result = new BigInt();
 
-            if (A.CompareTo(B) == 0)
+            if (A.AbsCompareTo(B) == 0)
             {
                 result.values.Add(0);
 
             }
-            if (A.CompareTo(B) == 1)
+            if (A.AbsCompareTo(B) == 1)
             {
 
                 int temp = 0;
@@ -542,8 +621,6 @@ namespace LongNumCalc
                 {
                     B.values.Add(0);
                 }
-
-
                 for (int i = 0; i < A.values.Count; i++)
                 {
                     result.values.Add(A.values[i] - B.values[i] - temp);
@@ -557,6 +634,7 @@ namespace LongNumCalc
                         temp = 0;
                     }
                 }
+                // HACK: удаление лишних нулей из уменьшаемого
                 if (result.values.Count > 0)
                 {
                     int k = result.values.Count - 1;
@@ -567,14 +645,13 @@ namespace LongNumCalc
 
                     }
                 }
-
-
             }
-            if (A.CompareTo(B) == -1)
+            if (A.AbsCompareTo(B) == -1)
             {
                 result = BigInt.AbsSubstraction(B, A);
                 result.ChangeSign();
             }
+            // HACK: удаление лишних нулей из вычитаемоего 
             if (B.values.Count > 0)
             {
                 int k = B.values.Count - 1;
@@ -589,7 +666,6 @@ namespace LongNumCalc
 
                 }
             }
-
             return result;
 
         }
@@ -621,14 +697,23 @@ namespace LongNumCalc
                 }
             }
             if (temp != 0)
-
             {
                 result.values.Add(temp);
             }
             return result;
         }
         public static BigInt Multiplication(BigInt A, BigInt B)
-        {
+        {   bool new_sign;
+            if ((A.sign && B.sign) || (!A.sign && !B.sign))
+            {
+                new_sign=true;
+            }
+            else
+            {
+                new_sign = false;
+            }
+            A.ChangeSign(true);
+            B.ChangeSign(true);
             BigInt result = new BigInt();
 
             for (int i = 0; i < A.values.Count; i++)
@@ -640,30 +725,30 @@ namespace LongNumCalc
                 }
                 result = BigInt.Addition(result, temp);//складываем с другими
             }
-            if ((A.sign && B.sign) || (!A.sign && !B.sign))
+            if (result.values.Count > 0)
             {
-                result.ChangeSign(true);
-            }
-            else
-            {
-                result.ChangeSign(false);
-            }
-            int k = result.values.Count - 1;
-            while (result.values[k] == 0) //удаление возможных лишних нулей
-            {
-                if (k == 0)
+                int k = result.values.Count - 1;
+                while (result.values[k] == 0) //удаление возможных лишних нулей
                 {
-                    result.ChangeSign(true);
-                    break;
+                    if (k == 0)
+                    {
+                        result.ChangeSign(true);
+                        break;
+                    }
+                    result.values.RemoveAt(k);
+                    k--;
                 }
-                result.values.RemoveAt(k);
-                k--;
-
             }
+            result.ChangeSign(new_sign);
             return result;
         }
         public static BigInt Division(BigInt A, BigInt B)
         {
+            BigInt zero = new BigInt("0");
+            if (B.CompareTo(zero)==0)
+            {
+                throw new DivisionbyZeroException("Division by zero");
+            }
             bool new_sign;
             if ((A.sign && B.sign) || (!A.sign && !B.sign))
             {
@@ -687,6 +772,7 @@ namespace LongNumCalc
             {
 
                 temp.values.Insert(0, A.values[i]);
+                // HACK: удаление лишних нулей из temp
                 if (temp.values.Count > 0)
                 {
                     int k = temp.values.Count - 1;
@@ -698,7 +784,6 @@ namespace LongNumCalc
                         }
                         temp.values.RemoveAt(k);
                         k--;
-
                     }
                 }
                 while (temp.CompareTo(B) >= 0)
@@ -712,6 +797,7 @@ namespace LongNumCalc
                 }
             }
             res.ChangeSign(new_sign);
+            // HACK: удаление лишних нулей из res
             if (res.values.Count > 0)
             {
                 int k = res.values.Count - 1;
@@ -724,22 +810,17 @@ namespace LongNumCalc
                     }
                     res.values.RemoveAt(k);
                     k--;
-
                 }
             }
             return res;
         }
     }
-    class InputException : Exception
+    public class DivisionbyZeroException : Exception
     {
-        public char wrongSymbol;
-        public InputException(String message, char wrongSymbol):base (message)
-        {
-            this.wrongSymbol = wrongSymbol;
-        }
+        public DivisionbyZeroException() { }
+        public DivisionbyZeroException(string message) : base(message) { }
     }
-
-
+    
 }
 
    
