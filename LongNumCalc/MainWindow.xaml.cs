@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
+
 namespace LongNumCalc
 {
     /// <summary>
@@ -28,86 +29,95 @@ namespace LongNumCalc
 
         private void button_0_Click(object sender, RoutedEventArgs e)
         {
-            tb_console_one.Text = tb_console_one.Text + "0";
+            if (tb_console_one.Text.Length < 84)
+                tb_console_one.Text = tb_console_one.Text + "0";
         }
         private void button_1_Click(object sender, RoutedEventArgs e)
         {
-            tb_console_one.Text = tb_console_one.Text + "1";
+            if (tb_console_one.Text.Length < 84)
+                tb_console_one.Text = tb_console_one.Text + "1";
+            
         }
 
         private void button_2_Click(object sender, RoutedEventArgs e)
         {
-            tb_console_one.Text = tb_console_one.Text + "2";
+            if (tb_console_one.Text.Length < 84)
+                tb_console_one.Text = tb_console_one.Text + "2";
         }
 
         private void button_3_Click(object sender, RoutedEventArgs e)
         {
-            tb_console_one.Text = tb_console_one.Text + "3";
+            if (tb_console_one.Text.Length < 84)
+                tb_console_one.Text = tb_console_one.Text + "3";
         }
 
         private void button_4_Click(object sender, RoutedEventArgs e)
         {
-            tb_console_one.Text = tb_console_one.Text + "4";
+            if (tb_console_one.Text.Length < 84)
+                tb_console_one.Text = tb_console_one.Text + "4";
         }
 
         private void button_5_Click(object sender, RoutedEventArgs e)
         {
-            tb_console_one.Text = tb_console_one.Text + "5";
+            if (tb_console_one.Text.Length < 84)
+                tb_console_one.Text = tb_console_one.Text + "5";
         }
 
         private void button_6_Click(object sender, RoutedEventArgs e)
         {
-            tb_console_one.Text = tb_console_one.Text + "6";
+            if (tb_console_one.Text.Length < 84)
+                tb_console_one.Text = tb_console_one.Text + "6";
         }
 
         private void button_7_Click(object sender, RoutedEventArgs e)
         {
-            tb_console_one.Text = tb_console_one.Text + "7";
+            if (tb_console_one.Text.Length < 84)
+                tb_console_one.Text = tb_console_one.Text + "7";
         }
 
         private void button_8_Click(object sender, RoutedEventArgs e)
         {
-            tb_console_one.Text = tb_console_one.Text + "8";
+            if (tb_console_one.Text.Length < 84)
+                tb_console_one.Text = tb_console_one.Text + "8";
         }
 
         private void button_9_Click(object sender, RoutedEventArgs e)
         {
-            tb_console_one.Text = tb_console_one.Text + "9";
+            if (tb_console_one.Text.Length < 84)
+                tb_console_one.Text = tb_console_one.Text + "9";
         }
-
-        private void button_dot_Click(object sender, RoutedEventArgs e)
-        {
-            tb_console_one.Text = tb_console_one.Text + ".";
-        }
-
         private void button_minus_Click(object sender, RoutedEventArgs e)
         {
-            tb_console_one.Text = tb_console_one.Text + "-";
+            if (tb_console_one.Text.Length < 84)
+                tb_console_one.Text = tb_console_one.Text + "-";
         }
-
         private void button_mult_Click(object sender, RoutedEventArgs e)
         {
-            tb_console_one.Text = tb_console_one.Text + "*";
+            if (tb_console_one.Text.Length < 84)
+                tb_console_one.Text = tb_console_one.Text + "*";
         }
-
         private void button_div_Click(object sender, RoutedEventArgs e)
         {
-            tb_console_one.Text = tb_console_one.Text + "/";
+            if (tb_console_one.Text.Length < 84)
+                tb_console_one.Text = tb_console_one.Text + "/";
         }
 
         private void button_rightbrace_Click(object sender, RoutedEventArgs e)
         {
-            tb_console_one.Text = tb_console_one.Text + ")";
+            if (tb_console_one.Text.Length < 84)
+                tb_console_one.Text = tb_console_one.Text + ")";
         }
 
         private void button_plus_Click(object sender, RoutedEventArgs e)
         {
-            tb_console_one.Text = tb_console_one.Text + "+";
+            if (tb_console_one.Text.Length < 84)
+                tb_console_one.Text = tb_console_one.Text + "+";
         }
 
         private void button_leftbrace_Click(object sender, RoutedEventArgs e)
         {
-            tb_console_one.Text = tb_console_one.Text + "(";
+            if (tb_console_one.Text.Length < 84)
+                tb_console_one.Text = tb_console_one.Text + "(";
         }
 
         private void button_res_Click(object sender, RoutedEventArgs e)
@@ -116,14 +126,13 @@ namespace LongNumCalc
             try
             {
                 string input = tb_console_one.Text;
-                tb_console_one.Text = ReversePolishNotation.Calculate(input).ToString();
+                tb_console_one.Text = ReversePolishNotation.PerformCalculations(input).ToString();
                 tb_console_two.Text = input+"=";
                 tb_console_one.Focus();
             }
             catch (FormatException)
             {
                 MessageBox.Show("Wrong input", "Warning");
-                
                 tb_console_one.Focus();
             }
             catch (DivisionbyZeroException)
@@ -155,28 +164,44 @@ namespace LongNumCalc
 
         private void tb_console_one_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key==Key.Space)
+            if (e.Key==Key.Space)//запрет ввода пробела
             {
                 e.Handled = true;
             }
             if (e.Key==Key.Enter)
             {
-                
+                try
+                {
+                    string input = tb_console_one.Text;
+                    tb_console_one.Text = ReversePolishNotation.PerformCalculations(input).ToString();
+                    tb_console_two.Text = input + "=";
+                    tb_console_one.Focus();
+                }
+                catch (FormatException)
+                {
+                    MessageBox.Show("Wrong input", "Warning");
+                    tb_console_one.Focus();
+                }
+                catch (DivisionbyZeroException)
+                {
+
+                    MessageBox.Show("Division by zero", "Warning");
+
+                    tb_console_one.Focus();
+                }
             }
         }
     }
-    /// <summary>
-    ///  Класс, реализующий получение и вычисления , получаемого из входных данных
-    /// </summary>
+    ///  Класс, реализующий перевод входного выражения в рпн и вычисление его значения
     public class ReversePolishNotation
     {
-        static private bool IsOperatorNotBrace(char c)
+        static private bool IsOperatorNotBrace(char c) 
         {
             if (("+-/*".IndexOf(c) != -1))
                 return true;
             return false;
         }
-       // Метод возвращает true, если проверяемый символ - разделитель("пробел" или "равно")
+
         static private bool IsDelimeter(char c)
         {
             if ((" =".IndexOf(c) != -1))
@@ -203,9 +228,9 @@ namespace LongNumCalc
                 default: return 6;
             }
         }
-        static public void CheckInput(string input)
+        static public void CheckInput(string input) // метод реализующий проверку корректности входного выражения
         {
-            if (IsOperatorNotBrace(input[0]) || IsOperatorNotBrace(input[input.Length - 1]))
+            if (IsOperatorNotBrace(input[0]) || IsOperatorNotBrace(input[input.Length - 1])) // если или последний символы-операторы но не скобки
             {
                 throw new FormatException();
             }
@@ -213,16 +238,16 @@ namespace LongNumCalc
             for (int i = 0; i < input.Length - 1; i++)
             {
 
-                if (IsOperatorNotBrace(input[i]) && IsOperatorNotBrace(input[i + 1]))
+                if (IsOperatorNotBrace(input[i]) && IsOperatorNotBrace(input[i + 1])) //если два оператора, но не скобки, идут подряд
                 {
                     throw new FormatException();
                 }
 
-                if (input[i] == '(' && (input[i + 1] != '-' && !Char.IsDigit(input[i + 1]) && input[i + 1] != '(')) // TODO : some unclear with truth-functional operations
+                if (input[i] == '(' && (input[i + 1] != '-' && !Char.IsDigit(input[i + 1]) && input[i + 1] != '(')) // TODO : some unclear with truth-functional operations 
                 {
                     throw new FormatException();
                 }
-                if (input[i]=='-'&& input[i+1]==')')
+                if (input[i] == '-' && input[i + 1] == ')')
                 {
                     throw new FormatException();
                 }
@@ -247,65 +272,58 @@ namespace LongNumCalc
                 }
                 j++;
             }
-            if (s.Count!=0)
+            if (s.Count != 0)
             {
                 throw new FormatException();
             }
 
         }
 
-        static public BigInt Calculate(string input)
+        static public BigInt PerformCalculations(string input) 
         {
             CheckInput(input);
-            string output = GetExpression(input); //Преобразовыние выражения в постфиксную запись
-            BigInt result = CalculationRpn(output); //Вычисление значения в рпн
+            string output = GetExpression(input); 
+            BigInt result = CalculationRpn(output); 
             return result;
         }
         static private string GetExpression(string input)
         {
-            string output = string.Empty; //Строка для хранения выражения
-            Stack<char> operStack = new Stack<char>(); //Стек для хранения операторов
-            for (int i = 0; i < input.Length; i++) //Для каждого символа в входной строке
-            {   
-                //if (Char.IsLetter(input[i]))
-                //{
-                //    throw new InputException("Invalid symbol",input[i]);
-                //}
-                //Разделители пропускаем
-                if (IsDelimeter(input[i]))
-                {
-                    continue; //Переходим к следующему символу
-                }
-                //Если символ - цифра, то считываем все число
-                if (Char.IsDigit(input[i])) //Если цифра
-                {
-                    //Читаем до разделителя или оператора, что бы получить число
-                    while (!IsDelimeter(input[i]) && !IsOperator(input[i]))
+            string output = string.Empty; 
+            Stack<char> operStack = new Stack<char>(); 
+            for (int i = 0; i < input.Length; i++) 
+            {
+               
+                //Если символ -цифра-считываю число
+                if (Char.IsDigit(input[i])) 
+                {   //!IsDelimeter(input[i]) &&
+                    //Считывание до оператора
+                    while ( !IsOperator(input[i]))
                     {
-                        output += input[i]; //Добавляем каждую цифру числа к нашей строке
-                        i++; //Переходим к следующему символу
-
-                        if (i == input.Length) break; //Если символ - последний, то выходим из цикла
+                        output += input[i]; //Запись числа в строку
+                        i++; //К след символу
+                        if (i == input.Length)
+                            break; //Если символ - последний, то выход из цикла
                     }
-                    output += " "; //Дописываем после числа пробел в строку с выражением
-                    i--; //Возвращаемся на один символ назад, к символу перед разделителем
+                    output += " "; //Пробел после числа в выходной строке
+                    i--; //Возвращаемся на один символ назад, к символу перед разделителем(предотвращение выхода индекса за пределы массива)
                 }
                 //Если символ - оператор
                 if (IsOperator(input[i])) //Если оператор
                 {
                     if (operStack.Count != 0)
                     {
-                        if (input[i] == '-' && operStack.Peek() == '(' && !Char.IsDigit(input[i-1])) // HACK : for correct work with x*(y-y) types
+                        //реализация унарного минуса
+                        if (input[i] == '-' && operStack.Peek() == '('  && !Char.IsDigit(input[i - 1])) // HACK : for correct work with x*(y-y) types
                         {
                             operStack.Push('!');
                             continue;
                         }
                     }
-                    if (input[i] == '(') //Если символ - открывающая скобка
-                        operStack.Push(input[i]); //Записываем её в стек
+                    if (input[i] == '(') 
+                        operStack.Push(input[i]); //Запись в стек
                     else if (input[i] == ')') //Если символ - закрывающая скобка
                     {
-                        //Выписываем все операторы до открывающей скобки в строку
+                        //Выбрасываю все операторы до открывающей скобки в строку
                         char s = operStack.Pop();
                         while (s != '(')
                         {
@@ -316,18 +334,18 @@ namespace LongNumCalc
                     else //Если любой другой оператор
                     {
                         if (operStack.Count > 0)//Если в стеке есть элементы
-                            if (GetPriority(input[i]) <= GetPriority(operStack.Peek())) //И если приоритет нашего оператора меньше или равен приоритету оператора на вершине стека
-                                 output += operStack.Pop().ToString() + " "; //То добавляем последний оператор из стека в строку с выражением
-                            operStack.Push(char.Parse(input[i].ToString())); //Если стек пуст, или же приоритет оператора выше - добавляем операторов на вершину стека
+                            if (GetPriority(input[i]) <= GetPriority(operStack.Peek())) //Если приоритет  оператора меньше или равен приоритету оператора на вершине стека
+                                output += operStack.Pop().ToString() + " "; //То добавляем последний оператор из стека в строку с выражением
+                        operStack.Push(char.Parse(input[i].ToString())); //Если стек пуст, или  приоритет оператора выше - добавляем операторов на вершину стека
                     }
                 }
             }
-            //выкидываем из стека все оставшиеся там операторы в строку
+            //выбрасываю из стека все  операторы в строку
             while (operStack.Count > 0)
             {
                 output += operStack.Pop() + " ";
             }
-            return output; //Возвращаем выражение в постфиксной записи
+            return output;
         }
         static private BigInt CalculationRpn(string input)
         {
@@ -335,11 +353,12 @@ namespace LongNumCalc
             Stack<BigInt> temp = new Stack<BigInt>(); // стек для решения
             for (int i = 0; i < input.Length; i++) // иду по строке
             {
-                //Если символ - цифра, то читаем все число и записываем на вершину стека
+                //Если символ - цифра, то читаю все число и записываю на вершину стека
                 if (Char.IsDigit(input[i]))
                 {
+                    
                     string a = string.Empty;
-                    while (!IsDelimeter(input[i]) && !IsOperator(input[i])) //Пока не разделитель
+                    while (!IsDelimeter(input[i]) && !IsOperator(input[i])) 
                     {
                         a += input[i]; //Добавляем
                         i++;
@@ -367,14 +386,18 @@ namespace LongNumCalc
                     BigInt b = temp.Pop();
                     switch (input[i]) //И производим над ними действие, согласно оператору
                     {
-                        case '+': result = BigInt.Addition(b,a);
-                        break;
-                        case '-': result = BigInt.Substraction(b,a);
-                        break;
-                        case '*': result = BigInt.Multiplication(b,a);
-                        break;
-                        case '/': result = BigInt.Division(b,a);
-                        break;
+                        case '+':
+                            result = BigInt.Addition(b, a);
+                            break;
+                        case '-':
+                            result = BigInt.Substraction(b, a);
+                            break;
+                        case '*':
+                            result = BigInt.Multiplication(b, a);
+                            break;
+                        case '/':
+                            result = BigInt.Division(b, a);
+                            break;
                     }
                     temp.Push(result); //Результат вычисления записываем обратно в стек
                 }
@@ -388,15 +411,27 @@ namespace LongNumCalc
         private bool sign = true;
         public BigInt(string string_values)
         {
-            if (string_values[0] == '-')
+            if (string_values[0] == '-') // реализация считывания отрицательного числа
             {
                 sign = false;
                 string_values = string_values.Remove(0, 1);
             }
-
-            for (int i = string_values.Length - 1; i >= 0; i--)
+            
+            for (int i = string_values.Length - 1; i >= 0; i--) //запись в представление длинного числа
             {
                 values.Add(int.Parse(string_values[i].ToString()));
+            }
+            //удаление лидирующих нулей (ввод 00x)
+            int k = this.values.Count - 1;
+            while (this.values[k] == 0)
+            {
+               if (k == 0)
+               {
+                   break;
+               }
+               this.values.RemoveAt(k);
+               k--;
+
             }
         }
         public BigInt()
@@ -421,7 +456,7 @@ namespace LongNumCalc
                 }
             }
             StringBuilder sb = new StringBuilder();
-            if (sign == false)
+            if (sign == false) //реализация корректного вывода отрицательного числа
             {
                 sb.Append("(");
                 sb.Append("-");
@@ -434,10 +469,10 @@ namespace LongNumCalc
             {
                 sb.Append(")");
             }
-           
+
             return sb.ToString();
         }
-        public void ChangeSign()
+        public void ChangeSign() //смена знака на противоположный
         {
             if (sign == true)
             {
@@ -450,11 +485,11 @@ namespace LongNumCalc
                 return;
             }
         }
-        public void ChangeSign(bool sign)
+        public void ChangeSign(bool sign) //смена знака на заданный
         {
             this.sign = sign;
         }
-       
+
         public int CompareTo(BigInt other)
         {
             if (this.sign && other.sign)//оба положительных
@@ -553,7 +588,7 @@ namespace LongNumCalc
         {
             int temp = 0;
             BigInt result = new BigInt();
-            int counter = A.values.Count <= B.values.Count ? A.values.Count : B.values.Count;
+            int counter = A.values.Count <= B.values.Count ? A.values.Count : B.values.Count; // кол-во итераций для сложения (меньшее)
             for (int i = 0; i < counter; i++)
             {
                 temp = A.values[i] + B.values[i] + temp;
@@ -568,6 +603,7 @@ namespace LongNumCalc
                     temp = 0;
                 }
             }
+            //запись оставшихся разрядов в результат
             if (A.values.Count == B.values.Count && temp != 0)
             {
                 result.values.Add(temp);
@@ -584,7 +620,7 @@ namespace LongNumCalc
                     {
                         result.values.Add(A.values[i]);
                     }
-                    
+
                 }
             }
             if (B.values.Count > A.values.Count)
@@ -617,7 +653,7 @@ namespace LongNumCalc
 
                 int temp = 0;
 
-                while (B.values.Count < A.values.Count)
+                while (B.values.Count < A.values.Count) //дополнение более короткого числа нулями
                 {
                     B.values.Add(0);
                 }
@@ -626,7 +662,7 @@ namespace LongNumCalc
                     result.values.Add(A.values[i] - B.values[i] - temp);
                     if (result.values[i] < 0)
                     {
-                        result.values[i] += 10;
+                        result.values[i] += 10; //заеи из соседнего разряда
                         temp = 1;
                     }
                     else
@@ -634,7 +670,7 @@ namespace LongNumCalc
                         temp = 0;
                     }
                 }
-                // HACK: удаление лишних нулей из уменьшаемого
+                // HACK: удаление лишних нулей из результата
                 if (result.values.Count > 0)
                 {
                     int k = result.values.Count - 1;
@@ -646,7 +682,7 @@ namespace LongNumCalc
                     }
                 }
             }
-            if (A.AbsCompareTo(B) == -1)
+            if (A.AbsCompareTo(B) == -1) 
             {
                 result = BigInt.AbsSubstraction(B, A);
                 result.ChangeSign();
@@ -703,10 +739,11 @@ namespace LongNumCalc
             return result;
         }
         public static BigInt Multiplication(BigInt A, BigInt B)
-        {   bool new_sign;
+        {
+            bool new_sign;
             if ((A.sign && B.sign) || (!A.sign && !B.sign))
             {
-                new_sign=true;
+                new_sign = true;
             }
             else
             {
@@ -745,7 +782,7 @@ namespace LongNumCalc
         public static BigInt Division(BigInt A, BigInt B)
         {
             BigInt zero = new BigInt("0");
-            if (B.CompareTo(zero)==0)
+            if (B.CompareTo(zero) == 0)
             {
                 throw new DivisionbyZeroException("Division by zero");
             }
