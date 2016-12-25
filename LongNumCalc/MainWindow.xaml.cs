@@ -26,12 +26,12 @@ namespace LongNumCalc
             InitializeComponent();
             tb_console_one.Focus();
         }
-
         private void button_0_Click(object sender, RoutedEventArgs e)
         {
             if (tb_console_one.Text.Length < 84)
                 tb_console_one.Text = tb_console_one.Text + "0";
         }
+
         private void button_1_Click(object sender, RoutedEventArgs e)
         {
             if (tb_console_one.Text.Length < 84)
@@ -91,11 +91,13 @@ namespace LongNumCalc
             if (tb_console_one.Text.Length < 84)
                 tb_console_one.Text = tb_console_one.Text + "-";
         }
+
         private void button_mult_Click(object sender, RoutedEventArgs e)
         {
             if (tb_console_one.Text.Length < 84)
                 tb_console_one.Text = tb_console_one.Text + "*";
         }
+
         private void button_div_Click(object sender, RoutedEventArgs e)
         {
             if (tb_console_one.Text.Length < 84)
@@ -107,7 +109,6 @@ namespace LongNumCalc
             if (tb_console_one.Text.Length < 84)
                 tb_console_one.Text = tb_console_one.Text + ")";
         }
-
         private void button_plus_Click(object sender, RoutedEventArgs e)
         {
             if (tb_console_one.Text.Length < 84)
@@ -122,24 +123,31 @@ namespace LongNumCalc
 
         private void button_res_Click(object sender, RoutedEventArgs e)
         {
-            
+
             try
             {
-                string input = tb_console_one.Text;
-                tb_console_one.Text = ReversePolishNotation.PerformCalculations(input).ToString();
-                tb_console_two.Text = input+"=";
-                tb_console_one.Focus();
-            }
-            catch (FormatException)
-            {
-                MessageBox.Show("Wrong input", "Warning");
-                tb_console_one.Focus();
-            }
-            catch (DivisionbyZeroException)
-            {
 
-                MessageBox.Show("Division by zero","Warning");
-                
+                string input = tb_console_one.Text;
+
+                if (input != String.Empty)
+                {
+
+                    tb_console_one.Text = ReversePolishNotation.PerformCalculations(input).ToString();
+                    tb_console_two.Text = input + "=";
+                    tb_console_one.Focus();
+                }
+            }
+            catch (FormatException ex)
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.Append("Неверный ввод: ");
+                sb.Append(ex.Message);
+                MessageBox.Show(sb.ToString(), "Warning");
+                tb_console_one.Focus();
+            }
+            catch (DivideByZeroException)
+            {
+                MessageBox.Show("Деление на ноль", "Warning");
                 tb_console_one.Focus();
             }
         }
@@ -157,6 +165,7 @@ namespace LongNumCalc
             tb_console_one.Text = "";
             tb_console_two.Text = "";
         }
+
         private  void tb_console_one_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             e.Handled= "0123456789+-*/() ".IndexOf(e.Text) < 0;
@@ -172,25 +181,39 @@ namespace LongNumCalc
             {
                 try
                 {
+
                     string input = tb_console_one.Text;
-                    tb_console_one.Text = ReversePolishNotation.PerformCalculations(input).ToString();
-                    tb_console_two.Text = input + "=";
+
+                    if (input != String.Empty)
+                    {
+                      
+                        tb_console_one.Text = ReversePolishNotation.PerformCalculations(input).ToString();
+                        tb_console_two.Text = input + "=";
+                        tb_console_one.Focus();
+                    }
+                }
+                catch (FormatException ex)
+                {
+                    StringBuilder sb = new StringBuilder();
+                    sb.Append("Неверный ввод: ");
+                    sb.Append(ex.Message);
+                    MessageBox.Show(sb.ToString(), "Warning");
                     tb_console_one.Focus();
                 }
-                catch (FormatException)
+                catch (DivideByZeroException)
                 {
-                    MessageBox.Show("Wrong input", "Warning");
-                    tb_console_one.Focus();
-                }
-                catch (DivisionbyZeroException)
-                {
-
-                    MessageBox.Show("Division by zero", "Warning");
-
+                    MessageBox.Show("Деление на ноль", "Warning");
                     tb_console_one.Focus();
                 }
             }
         }
+        private void button_reference_Click(object sender, RoutedEventArgs e)
+        {
+            string message;
+            message = "Отрицательные числа вводятся в скобках.\nПри целочисленном делении остаток отбрасывается.";
+            MessageBox.Show(message,"Справка");
+        }
+
     }
     ///  Класс, реализующий перевод входного выражения в рпн и вычисление его значения
     public class ReversePolishNotation
@@ -208,12 +231,14 @@ namespace LongNumCalc
                 return true;
             return false;
         }
+
         static private bool IsOperator(char с)
         {
             if (("+-/*()".IndexOf(с) != -1))
                 return true;
             return false;
         }
+
         static private byte GetPriority(char s)
         {
             switch (s)
@@ -228,29 +253,57 @@ namespace LongNumCalc
                 default: return 6;
             }
         }
+
         static public void CheckInput(string input) // метод реализующий проверку корректности входного выражения
         {
+            
+            if (!IsOperator(input[input.Length-1]) && !Char.IsDigit(input[input.Length-1]))
+            {
+                throw new FormatException("Неверный символ");
+            }
             if (IsOperatorNotBrace(input[0]) || IsOperatorNotBrace(input[input.Length - 1])) // если или последний символы-операторы но не скобки
             {
-                throw new FormatException();
+                throw new FormatException("Неверная расстановка операторов");
             }
+           
             Stack<char> s = new Stack<char>();
             for (int i = 0; i < input.Length - 1; i++)
             {
 
+                if (!IsOperator(input[i]) && !Char.IsDigit(input[i])) 
+                {
+                    throw new FormatException("Недопустимый символ");
+                }
                 if (IsOperatorNotBrace(input[i]) && IsOperatorNotBrace(input[i + 1])) //если два оператора, но не скобки, идут подряд
                 {
-                    throw new FormatException();
+                    throw new FormatException("Неверная расстановка операторов");
                 }
 
-                if (input[i] == '(' && (input[i + 1] != '-' && !Char.IsDigit(input[i + 1]) && input[i + 1] != '(')) // TODO : some unclear with truth-functional operations 
+                if (input[i] == '(' && (input[i + 1] != '-' && !Char.IsDigit(input[i + 1]) && input[i + 1] != '(')) 
                 {
-                    throw new FormatException();
+                    throw new FormatException("Неверная расстановка операторов");
+                }
+                if (input[i]==')' && input[i+1]=='(')
+                { 
+                    throw new FormatException("Неверная расстановка скобок");
+                }
+                if (input[i+1]=='(' && input[i]==')')
+                {
+                    throw new FormatException("Неверная расстановка скобок");
                 }
                 if (input[i] == '-' && input[i + 1] == ')')
                 {
-                    throw new FormatException();
+                    throw new FormatException("Неверная расстановка операторов");
                 }
+                if ((input[i] == ')' && !IsOperator(input[i + 1])))
+                {
+                    throw new FormatException("Неверная расстановка операторов");
+                }
+                if ((input[i+1]=='(') && !IsOperator(input[i]))
+                {
+                    throw new FormatException("Неверная расстановка операторов"); //??
+                }
+
             }
             int j = 0;
             while (j < input.Length)
@@ -263,7 +316,7 @@ namespace LongNumCalc
                 {
                     if (s.Count == 0)
                     {
-                        throw new FormatException();
+                        throw new FormatException("Неверная расстановка скобок");
                     }
                     else
                     {
@@ -274,7 +327,7 @@ namespace LongNumCalc
             }
             if (s.Count != 0)
             {
-                throw new FormatException();
+                throw new FormatException("Неверная расстановка скобок");
             }
 
         }
@@ -288,11 +341,11 @@ namespace LongNumCalc
         }
         static private string GetExpression(string input)
         {
+            input = input.Replace(" ", String.Empty);
             string output = string.Empty; 
             Stack<char> operStack = new Stack<char>(); 
             for (int i = 0; i < input.Length; i++) 
             {
-               
                 //Если символ -цифра-считываю число
                 if (Char.IsDigit(input[i])) 
                 {   //!IsDelimeter(input[i]) &&
@@ -356,13 +409,11 @@ namespace LongNumCalc
                 //Если символ - цифра, то читаю все число и записываю на вершину стека
                 if (Char.IsDigit(input[i]))
                 {
-                    
                     string a = string.Empty;
                     while (!IsDelimeter(input[i]) && !IsOperator(input[i])) 
                     {
                         a += input[i]; //Добавляем
                         i++;
-
                         if (i == input.Length)
                         {
                             break;
@@ -678,7 +729,6 @@ namespace LongNumCalc
                     {
                         result.values.RemoveAt(k);
                         k--;
-
                     }
                 }
             }
@@ -784,7 +834,7 @@ namespace LongNumCalc
             BigInt zero = new BigInt("0");
             if (B.CompareTo(zero) == 0)
             {
-                throw new DivisionbyZeroException("Division by zero");
+                throw new DivideByZeroException("Division by zero");
             }
             bool new_sign;
             if ((A.sign && B.sign) || (!A.sign && !B.sign))
@@ -852,12 +902,6 @@ namespace LongNumCalc
             return res;
         }
     }
-    public class DivisionbyZeroException : Exception
-    {
-        public DivisionbyZeroException() { }
-        public DivisionbyZeroException(string message) : base(message) { }
-    }
-    
 }
 
    

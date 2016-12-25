@@ -24,8 +24,8 @@
         <Button x:Name="button_9" Content="9" HorizontalAlignment="Left" Margin="185,0,0,0" VerticalAlignment="Top" Width="75" Click="button_9_Click" Height="30" Grid.Row="1"/>
         <Button x:Name="button_6" Content="6" HorizontalAlignment="Left" Margin="185,35,0,0" VerticalAlignment="Top" Width="75" Click="button_6_Click" Grid.Row="1" Height="30"/>
         <Button x:Name="button_3" Content="3" HorizontalAlignment="Left" Margin="185,70,0,0" VerticalAlignment="Top" Width="75" Click="button_3_Click" Grid.Row="1" Height="30"/>
-        <Button x:Name="button_0" Content="0" HorizontalAlignment="Left" Margin="60,105,0,0" VerticalAlignment="Top" Width="75" Click="button_0_Click" Grid.Row="1" Height="30"/>
-        <Button x:Name="button_res" Content="=" HorizontalAlignment="Left" Margin="150,105,0,0" VerticalAlignment="Top" Width="75" Click="button_res_Click" Background="#FF4185F3" Foreground="White" BorderBrush="#FF4185F3" Grid.Row="1" Height="30" FontFamily="Segoe WP Black" />
+        <Button x:Name="button_0" Content="0" HorizontalAlignment="Left" Margin="105,105,0,0" VerticalAlignment="Top" Width="75" Click="button_0_Click" Grid.Row="1" Height="30"/>
+        <Button x:Name="button_res" Content="=" HorizontalAlignment="Left" Margin="186,105,0,0" VerticalAlignment="Top" Width="75" Click="button_res_Click" Background="#FF4185F3" Foreground="White" BorderBrush="#FF4185F3" Grid.Row="1" Height="30" FontFamily="Segoe WP Black" />
         <TextBox x:Name="tb_console_one" MaxLength="86" HorizontalAlignment="Left" Height="50" Margin="25,60,0,0" Text="" VerticalAlignment="Top" Width="430" FontSize="18" PreviewTextInput="tb_console_one_PreviewTextInput" IsHitTestVisible="True" TextWrapping="Wrap" PreviewKeyDown="tb_console_one_PreviewKeyDown" />
         <Button x:Name="button_minus" Content="-" HorizontalAlignment="Left" Margin="380,35,0,0" VerticalAlignment="Top" Width="75" Click="button_minus_Click" Grid.Row="1" Height="30"/>
         <Button x:Name="button_mult" Content="*" HorizontalAlignment="Left" Margin="300,70,0,0" VerticalAlignment="Top" Width="75" Click="button_mult_Click" Grid.Row="1" Height="30"/>
@@ -40,6 +40,7 @@
         </TextBox>
         <Button x:Name="button_del" Content="D" HorizontalAlignment="Left" Margin="300,0,0,0" VerticalAlignment="Top" Width="75" Height="30" Grid.Row="1" Click="button_del_Click"/>
         <Button x:Name="button1_delall" Content="DA" HorizontalAlignment="Left" Margin="380,0,0,0" VerticalAlignment="Top" Width="75" Height="30" Grid.Row="1" Click="button1_delall_Click"/>
+        <Button x:Name="button_reference" Content="Reference" HorizontalAlignment="Left" Margin="25,105,0,0" VerticalAlignment="Top" Width="75" Height="30" RenderTransformOrigin="0.467,2.133" Click="button_reference_Click" Grid.Row="1"/>
 
     </Grid>
 </Window>
