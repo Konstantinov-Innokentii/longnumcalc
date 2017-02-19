@@ -661,32 +661,42 @@ namespace LongNumCalc
             }
             if (A.values.Count > B.values.Count)
             {
-                for (int i = counter; i < A.values.Count; i++)
+                for (int i = counter; i < A.values.Count; i++)//<=
                 {
-                    if (i == counter)
+                   
+                    temp = temp + A.values[i];
+                    if (temp > 9)
                     {
-                        result.values.Add(temp + A.values[i]);
+                        result.values.Add(temp % 10);
+                        temp = temp / 10;
                     }
                     else
                     {
-                        result.values.Add(A.values[i]);
+                        result.values.Add(temp);
+                        temp = 0;
                     }
 
                 }
+                result.values.Add(temp);
             }
             if (B.values.Count > A.values.Count)
             {
                 for (int i = counter; i < B.values.Count; i++)
                 {
-                    if (i == counter)
+                    temp = temp + B.values[i];
+                    if (temp > 9)
                     {
-                        result.values.Add(temp + B.values[i]);
+                        result.values.Add(temp % 10);
+                        temp = temp / 10;
                     }
                     else
                     {
-                        result.values.Add(B.values[i]);
+                        result.values.Add(temp);
+                        temp = 0;
                     }
                 }
+                result.values.Add(temp);
+
             }
             return result;
         }
@@ -697,7 +707,6 @@ namespace LongNumCalc
             if (A.AbsCompareTo(B) == 0)
             {
                 result.values.Add(0);
-
             }
             if (A.AbsCompareTo(B) == 1)
             {
